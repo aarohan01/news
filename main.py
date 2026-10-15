@@ -50,7 +50,7 @@ async def get_feed(db : db_depends) -> list[ArticleResponse]:
     Fetch articles from the DB 
     session runs it so ORM style
     '''
-    # TODO : Currently fetching from Article -> need to fetch from a created feed
+    # TODO : Currently fetching from Article -> need to fetch from a created feed5
 
     stmt = Select(Article)
     resp = await db.scalars(stmt)

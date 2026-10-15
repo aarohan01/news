@@ -40,13 +40,14 @@ async def fetch_and_store_articles() -> list[ArticleResponse]:
     Convert to articles to normalize
     Convert to ORM object and store in db
     '''
+    articles_responses = []
     for source in sources.keys():
         
         entries = await get_rss(source)
         articles = await convert_entries_to_articles(entries, source)
-        articles_response = await save_articles(articles)
+        articles_responses.append(await save_articles(articles))
 
-    return articles_response
+    return articles_responses
 
 async def get_rss(source: str) -> list[ParseResponse] :
 
@@ -116,16 +117,18 @@ async def save_articles(articles:list[ArticleRequest]) -> list[ArticleResponse]:
     # to avoid db dupes use upsert
 
 
-    
+    '''
+    ### Let DB handle conflict and throw an error ###
     url_set = set()
     articles_dict = []
     for a in articles:
         if a.url not in url_set:
             url_set.add(a.url)
             articles_dict.append(a.model_dump())
+    '''
     
     
-
+    articles_list = [a.model_dump() for a in articles]
     async with session() as db:
 
         # No need as we are using insert(Core) not add(ORM style)
@@ -137,7 +140,7 @@ async def save_articles(articles:list[ArticleRequest]) -> list[ArticleResponse]:
         # stmt = Insert(table='articles').on_conflict_do_nothing.values(**db_article.model_dump())
 
         ##### TODO : insert with failure raise error
-        stmt = insert(Article).values(articles_dict).on_conflict_do_nothing().returning(Article)
+        stmt = insert(Article).values(articles_list).on_conflict_do_nothing().returning(Article)
         res = await db.scalars(stmt)
         res_all = res.all()
         await db.commit() 

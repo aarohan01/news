@@ -10,13 +10,13 @@ session = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 '''
-
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
 SQLALCHEMY_DB_URL = "sqlite+aiosqlite:///./db/app.db"
 async_engine = create_async_engine(SQLALCHEMY_DB_URL)
 session = async_sessionmaker(autoflush=False, autocommit=False, expire_on_commit=False, bind=async_engine)
+
 
 
 async def create_tables():
