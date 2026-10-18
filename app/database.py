@@ -15,7 +15,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 SQLALCHEMY_DB_URL = "sqlite+aiosqlite:///./db/app.db"
 async_engine = create_async_engine(SQLALCHEMY_DB_URL)
-session = async_sessionmaker(autoflush=False, autocommit=False, expire_on_commit=False, bind=async_engine)
+session_local = async_sessionmaker(autoflush=False, autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
 

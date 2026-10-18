@@ -1,38 +1,39 @@
 import feedparser
 from httpx import AsyncHTTPTransport, HTTPTransport, HTTPError, Client, AsyncClient
-from utils import pretty_print, run_async, time_struct_to_datetime
-from schemas.rss import ParseResponse
-from schemas.news import ArticleRequest, ArticleResponse
+
+from app.utils import pretty_print, run_async, time_struct_to_datetime
+from app.schemas.rss import ParseResponse
+from app.schemas.news import ArticleRequest, ArticleResponse
+from app.dependencies import AsyncSession
+from app.repositories.
+
 from pydantic import ValidationError
-from database import session
-from models.news import Article
-from sqlalchemy.dialects.sqlite import insert
+
+
+'''
+Connect to sources, get the RSS files, validate, convert to appropriate models/schemas and pass on to ingest service
+'''
+
+
 
 ## SOURCES ##
-sources = {'BBC': 'https://feeds.bbci.co.uk/news/rss.xml'
-           }
+#sources = {'BBC': 'https://feeds.bbci.co.uk/news/rss.xml'
+#           }
 
 
 ## Clients ##
 async_client = AsyncClient(timeout=10.0, transport=AsyncHTTPTransport(retries=3))
 #client = Client(timeout=10.0, transport=HTTPTransport(retries=3))
 
-## RSS ## 
-"""
-async def get_articles(source: str):
-    '''
-    Temporary function that fetches rss and converts it to articles to get fetched directly
-    '''
-    articles = []
-    entries = await get_rss(source)
-    if entries:
-        articles = await convert_entries_to_articles(entries, source)
-    return articles
-
-"""
 
 
-async def fetch_and_store_articles() -> list[ArticleResponse]:
+### ###
+async def test(db : AsyncSession):
+
+
+
+
+async def fetch_and_store_articles(db : AsyncSession) -> list[ArticleResponse]:
 
     '''
     Get RSS feed of the source.
@@ -107,7 +108,7 @@ async def convert_entries_to_articles(entries: list[ParseResponse], source: str)
 
 
 
-
+"""
 async def save_articles(articles:list[ArticleRequest]) -> list[ArticleResponse]:
 
 
@@ -140,7 +141,7 @@ async def save_articles(articles:list[ArticleRequest]) -> list[ArticleResponse]:
         # stmt = Insert(table='articles').on_conflict_do_nothing.values(**db_article.model_dump())
 
         ##### TODO : insert with failure raise error
-        stmt = insert(Article).values(articles_list).on_conflict_do_nothing().returning(Article)
+        stmt = insert(Article).values(articles_list).on_conflict_do_nothing(index_elements=['url']).returning(Article)
         res = await db.scalars(stmt)
         res_all = res.all()
         await db.commit() 
@@ -149,7 +150,7 @@ async def save_articles(articles:list[ArticleRequest]) -> list[ArticleResponse]:
     articles_reponse = [ArticleResponse.model_validate(r) for r in res_all]
     #print(articles_reponse)
     return articles_reponse
-
+"""
                 
 
     

@@ -15,13 +15,13 @@ db_depends = Annotated[Session,Depends(get_db)]
 '''
 
 from typing import Annotated
-from database import session
+from app.database import session_local
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
 async def get_db():
 
-    async with session() as db:
+    async with session_local() as db:
         yield db
 
 

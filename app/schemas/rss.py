@@ -15,3 +15,12 @@ class ParseResponse(BaseModel):
     published_parsed: struct_time 
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class SourceRead(BaseModel):
+
+    id: int = Field(ge=1)
+    name: str = Field(min_length=1)
+    url: str = Field(min_length=5)
+    active: bool
+    

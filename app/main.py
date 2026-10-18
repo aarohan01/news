@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException, status
-from clients import rss
-from database import create_tables
 from contextlib import asynccontextmanager
-from dependencies import db_depends
+
+from app.clients import rss
+from app.database import create_tables
+from app.dependencies import db_depends
+from app.models.news import Article
+from app.schemas.news import ArticleResponse
+
 from sqlalchemy import Select
-from models.news import Article
-from schemas.news import ArticleResponse
 
 ### TODO -> Error handling, cleanup, db interfaces 
 # TODO : Add more source -> later convert to a table 
