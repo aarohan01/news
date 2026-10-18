@@ -9,17 +9,23 @@ from app.services import ingest
 from app.services import scheduler
 
 from sqlalchemy import Select
+from datetime import datetime,timedelta,timezone
+### TODO -> Error handling - doing
+# new TODO -> env file -> db url, db type , db file location, logs file 
+# new TODO -> based on db url repo subclass of Postgres
+# new TODO -> alembic migration 
+# new TODO -> Currently fetching from Article last 120 min -> expand options put in repo and take input from user in route
+# new TODO -> return count of articles updated
 
-### TODO -> Error handling, cleanup, db interfaces 
-# TODO : Add more source -> later convert to a table 
-# TODO : schedule injetion instead of API 
+# TODO -> cleanup, db interfaces -- done
+# TODO : Add more source -> later convert to a table -- done
+# TODO : schedule injetion instead of API -- done
 # TODO : Big Task Create feed -> categorise and embeddings + sematic classification + feed within a time
 # TODO : Agent -> tool call, summarize 
-# TODO : SQLite to PostGres/MySQL
 # TODO : Auth 
 # TODO : Frontend 
 # TODO : frequent ingestion/frequent reads i.e. scale 
-# TODO : hardcoded sources remove ? -> DB
+# TODO : hardcoded sources remove ? -> DB  --- done 
 
 
 ### DB ###
@@ -54,9 +60,11 @@ async def get_feed(db : db_depends) -> list[ArticleResponse]:
     Fetch articles from the DB 
     session runs it so ORM style
     '''
-    # TODO : Currently fetching from Article -> need to fetch from a created feed5
-
-    stmt = Select(Article)
+    now = datetime.now(tz=timezone.utc)
+    delta = timedelta(minutes=120)
+    window = now - delta
+    
+    stmt = Select(Article).where(Article.published >= window).order_by(Article.published.desc())
     resp = await db.scalars(stmt)
 
     if not resp:
@@ -72,6 +80,7 @@ async def ingest_feed(source_repo : source_depends, article_repo : article_depen
 
     # TODO : HTTP exception 
     # TODO : no new articles handle 
+    # TODO : count the number of new articles ingested and LOG it in fetch and save
 
     await ingest.fetch_and_save_articles(source_repo,article_repo)
 

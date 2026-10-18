@@ -1,7 +1,7 @@
 import feedparser
 from httpx import AsyncHTTPTransport, HTTPTransport, HTTPError, Client, AsyncClient
 
-from app.utils import pretty_print, run_async, time_struct_to_datetime
+from app.utils import pretty_print
 from app.schemas.sources import SourceResponse
 from app.schemas.rss import RSSEntryResponse
 
@@ -41,8 +41,8 @@ async def get_rss(source: SourceResponse) -> list[RSSEntryResponse] :
 
         try:
             validated_entry = RSSEntryResponse.model_validate(entry)
-        except ValidationError:
-            print("Failed entry parsing validation...")
+        except ValidationError as e:
+            print(f"Failed entry parsing validation for source {source.id}...{e}")
         else:
             validated_entries.append(validated_entry)
 

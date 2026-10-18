@@ -77,17 +77,18 @@ class SQLArticleRepository(ArticleRepository):
         '''
         Batch insert and record dupes.
         '''
-        ##### TODO : insert with failure raise error
-        ## TODO : count the inserted articles and return that instead of articles
-        stmt = insert(Article).values(articles_list).on_conflict_do_nothing(index_elements=['url']).returning(Article)
-        res = await self.db.scalars(stmt)
-        res_all = res.all()
-        await self.db.commit() 
+        ##### TODO : insert LOG the amount of articles inserted from which sources, and report dupes
+        ## TODO : No new articles based on that, which is not an error  
+        if articles_list:
+            stmt = insert(Article).values(articles_list).on_conflict_do_nothing(index_elements=['url']).returning(Article)
+            res = await self.db.scalars(stmt)
+            res_all = res.all()
+            await self.db.commit() 
     
     
-        articles_reponse = [ArticleResponse.model_validate(r, from_attributes=True) for r in res_all]
-        #print([r.model_dump() for r in articles_reponse])
-        #return articles_reponse
+            articles_reponse = [ArticleResponse.model_validate(r, from_attributes=True) for r in res_all]
+            #print([r.model_dump() for r in articles_reponse])
+            #return articles_reponse
 
     
 
