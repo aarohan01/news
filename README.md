@@ -23,6 +23,7 @@ news/                              # Main Folder
 │   ├── database.py                # Dataabase core handling i.e. sessions, connections and Base
 │   ├── dependencies.py            # Dependency mapping, context managed for FastAPI
 │   ├── utils.py                   # Misc utils
+│   ├── __init__.py                # To tell FastAPI that app is a package
 │   └── main.py                    # Routes/CRUD
 ├── db/                            # DB storage file
 └── scripts/                       # Manual Scripts

@@ -2,11 +2,11 @@ from fastapi import FastAPI, HTTPException, status
 from contextlib import asynccontextmanager
 
 from app.database import create_tables
-from app.dependencies import db_depends
+from app.dependencies import db_depends, article_depends, source_depends
 from app.models.news import Article
 from app.schemas.news import ArticleResponse
 from app.services import ingest
-from app.repositories.sql_repository import SQLSourceRepository, SQLArticleRepository
+from app.services import scheduler
 
 from sqlalchemy import Select
 
@@ -32,8 +32,9 @@ async def lifespan(app : FastAPI):
     Do something before app starts -> yeild to app -> cleanup
     '''
     await create_tables()
+    await scheduler.start_scheduler()
     yield 
-    
+    await scheduler.stop_scheduler()
 
 ### APP ###
 app = FastAPI(lifespan=lifespan)
@@ -67,12 +68,10 @@ async def get_feed(db : db_depends) -> list[ArticleResponse]:
 
 
 @app.post('/ingest', status_code=status.HTTP_201_CREATED)
-async def ingest_feed(db : db_depends):
+async def ingest_feed(source_repo : source_depends, article_repo : article_depends):
 
     # TODO : HTTP exception 
     # TODO : no new articles handle 
-    source_repo = SQLSourceRepository(db)
-    article_repo = SQLArticleRepository(db)
 
     await ingest.fetch_and_save_articles(source_repo,article_repo)
 

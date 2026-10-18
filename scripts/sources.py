@@ -11,7 +11,10 @@ Run manually.
 ## TODO : DB neutral i.e. using repository
 ## TODO : Handle dupes i.e. given comment
 
-sources = [{'name':'BBC', 'url':'https://feeds.bbci.co.uk/news/rss.xml', 'active': True}]
+sources = [
+    {'name': 'BBC', 'url': 'https://feeds.bbci.co.uk/news/rss.xml', 'active': True},
+    {'name': 'NPR', 'url': 'https://feeds.npr.org/1001/rss.xml', 'active': True},
+]
 
 async def add_sources():
 

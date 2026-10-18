@@ -6,7 +6,7 @@ from app.schemas.sources import SourceResponse
 from app.models.news import Article, Source
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy import Select
-from app.dependencies import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 '''
 Repo to handle Database Operations.
@@ -89,4 +89,5 @@ class SQLArticleRepository(ArticleRepository):
         #print([r.model_dump() for r in articles_reponse])
         #return articles_reponse
 
+    
 
