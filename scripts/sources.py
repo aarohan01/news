@@ -1,6 +1,6 @@
 from app.database import session_local
 from app.models.news import Source
-from sqlalchemy import Insert
+from sqlalchemy.dialects.sqlite import insert
 import asyncio
 
 
@@ -17,7 +17,7 @@ async def add_sources():
 
     async with session_local() as db:
 
-        stmt = Insert(Source).values(sources)
+        stmt = insert(Source).values(sources).on_conflict_do_nothing(index_elements=['url'])
         await db.execute(statement=stmt)
         await db.commit()
 

@@ -1,7 +1,7 @@
 import json 
 import asyncio
 from time import struct_time
-from datetime import datetime
+from datetime import datetime, timezone
 
 def pretty_print(article, length = None):
 
@@ -27,5 +27,5 @@ def run_async(func, *args, **kwargs):
 
 def time_struct_to_datetime( stime : struct_time ) -> datetime:
 
-    return datetime(*stime[:6])
+    return datetime(*stime[:6], tzinfo=timezone.utc)
     

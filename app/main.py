@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException, status
 from contextlib import asynccontextmanager
 
-from app.clients import rss
 from app.database import create_tables
 from app.dependencies import db_depends
 from app.models.news import Article
 from app.schemas.news import ArticleResponse
+from app.services import ingest
+from app.repositories.sql_repository import SQLSourceRepository, SQLArticleRepository
 
 from sqlalchemy import Select
 
@@ -66,14 +67,15 @@ async def get_feed(db : db_depends) -> list[ArticleResponse]:
 
 
 @app.post('/ingest', status_code=status.HTTP_201_CREATED)
-async def ingest_feed():
+async def ingest_feed(db : db_depends):
 
     # TODO : HTTP exception 
     # TODO : no new articles handle 
-    resp = await rss.fetch_and_store_articles()
-    if not resp:
-        raise HTTPException(status_code=404)
-    return resp
+    source_repo = SQLSourceRepository(db)
+    article_repo = SQLArticleRepository(db)
+
+    await ingest.fetch_and_save_articles(source_repo,article_repo)
+
 
     
 

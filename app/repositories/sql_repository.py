@@ -1,6 +1,8 @@
+from abc import abstractmethod
+
 from app.repositories.base import ArticleRepository, SourceRepository
 from app.schemas.news import ArticleRequest, ArticleResponse
-from app.schemas.rss import SourceRead
+from app.schemas.sources import SourceResponse
 from app.models.news import Article, Source
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy import Select
@@ -11,6 +13,31 @@ Repo to handle Database Operations.
 SQLalchemy takes care when switching DB.
 Methods don't return ORM object always Pydantic schemas.
 '''
+
+class SQLSourceRepository(SourceRepository):
+
+    def __init__(self, db : AsyncSession):
+        
+        '''
+        Dependency Injection of DB session
+        '''
+        self.db = db
+
+    async def get_active_sources_from_db(self) -> list[SourceResponse]:
+
+        '''
+        Fetch the sources from DB 
+        Validate the ORM object to Pydantic Schema
+        Return a list of the Source schemas
+        '''
+
+        stmt = Select(Source).where(Source.active == True)
+        res = await self.db.scalars(stmt)
+        res_all = res.all()   # List of Source ORM objects
+        
+        sources = [SourceResponse.model_validate(r, from_attributes=True) for r in res_all]
+
+        return sources
 
 
 class SQLArticleRepository(ArticleRepository):
@@ -30,6 +57,7 @@ class SQLArticleRepository(ArticleRepository):
         self.db = db
 
 
+    
     async def save_articles_to_db(self, articles:list[ArticleRequest]) -> None:
     
         '''
@@ -51,38 +79,14 @@ class SQLArticleRepository(ArticleRepository):
         '''
         ##### TODO : insert with failure raise error
         ## TODO : count the inserted articles and return that instead of articles
-        stmt = insert(Article).values(articles_list).on_conflict_do_nothing().returning(Article)
+        stmt = insert(Article).values(articles_list).on_conflict_do_nothing(index_elements=['url']).returning(Article)
         res = await self.db.scalars(stmt)
         res_all = res.all()
         await self.db.commit() 
     
     
-        articles_reponse = [ArticleResponse.model_validate(r) for r in res_all]
-        print(articles_reponse)
+        articles_reponse = [ArticleResponse.model_validate(r, from_attributes=True) for r in res_all]
+        #print([r.model_dump() for r in articles_reponse])
         #return articles_reponse
 
 
-class SQLSourceRepository(SourceRepository):
-
-    def __init__(self, db : AsyncSession):
-        
-        '''
-        Dependency Injection of DB session
-        '''
-        self.db = db
-
-    async def get_active_sources_from_db(self) -> list[SourceRead]:
-
-        '''
-        Fetch the sources from DB 
-        Validate the ORM object to Pydantic Schema
-        Return a list of the Source schemas
-        '''
-
-        stmt = Select(Source).where(Source.active == True)
-        res = await self.db.scalars(stmt)
-        res_all = res.all()   # List of Source ORM objects
-        
-        sources = [SourceRead.model_validate(r) for r in res_all]
-
-        return sources

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from app.schemas.news import ArticleRequest 
-from app.schemas.rss import SourceRead
+from app.schemas.sources import SourceResponse
 
 
 class ArticleRepository(ABC):
@@ -18,5 +18,5 @@ class SourceRepository(ABC):
     For Source table
     '''
     @abstractmethod
-    async def get_active_sources_from_db(self) -> list[SourceRead]:
+    async def get_active_sources_from_db(self) -> list[SourceResponse]:
         pass 

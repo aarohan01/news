@@ -3,10 +3,10 @@ from time import struct_time
 
 
 
-class ParseResponse(BaseModel):
+class RSSEntryResponse(BaseModel):
 
     '''
-    Parse response validation
+    Validate the RSS entries from the RSS Sources
     '''
     title: str = Field(min_length=1)
     link: str = Field(min_length=1)
@@ -17,10 +17,4 @@ class ParseResponse(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class SourceRead(BaseModel):
-
-    id: int = Field(ge=1)
-    name: str = Field(min_length=1)
-    url: str = Field(min_length=5)
-    active: bool
     
