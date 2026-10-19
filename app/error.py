@@ -1,8 +1,12 @@
-class AppError(Exception):
+# TODO : Enum type, internal, external 
+# Rust Like -> return result or type of error and tag
+# One convention 
+
+class BaseError(Exception):
     pass
 
-class IngestError(AppError):
+class IngestError(BaseError):
     pass 
 
-class ClientError(AppError):
+class ClientError(BaseError):
     pass 

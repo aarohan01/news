@@ -4,14 +4,17 @@ from app.repositories.base import ArticleRepository, SourceRepository
 from app.schemas.news import ArticleRequest, ArticleResponse
 from app.schemas.sources import SourceResponse
 from app.models.news import Article, Source
+
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from datetime import datetime, timedelta, timezone
+
 '''
 Repo to handle Database Operations.
 SQLalchemy takes care when switching DB.
-Methods don't return ORM object always Pydantic schemas.
+IMPORTANT : Methods don't return ORM object always Pydantic schemas.Validate here.
 '''
 
 class SQLSourceRepository(SourceRepository):
@@ -59,7 +62,7 @@ class SQLArticleRepository(ArticleRepository):
 
     
     async def save_articles_to_db(self, articles:list[ArticleRequest]) -> None:
-    
+        
         '''
         Store the articles from the rss feed to the database.
         The articles are in object so convert to dict.
@@ -89,6 +92,28 @@ class SQLArticleRepository(ArticleRepository):
             articles_reponse = [ArticleResponse.model_validate(r, from_attributes=True) for r in res_all]
             #print([r.model_dump() for r in articles_reponse])
             #return articles_reponse
+
+    async def get_feed_from_db(self, minutes : int, source_id : int | None, limit : int ) -> list[ArticleResponse]:
+
+
+        # Time 
+        now = datetime.now(tz=timezone.utc)
+        delta = timedelta(minutes=minutes)
+        window = now - delta
+        stmt = Select(Article).where(Article.published >= window).order_by(Article.published.desc())
+        
+        # Source
+        if source_id:
+            stmt = stmt.where(Article.source_id == source_id)
+
+        # Limit
+        stmt = stmt.limit(limit=limit)
+
+    
+        resp = await self.db.scalars(stmt)
+        feed = [ArticleResponse.model_validate(a) for a in resp.all()]
+
+        return feed
 
     
 

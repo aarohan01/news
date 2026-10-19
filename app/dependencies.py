@@ -36,6 +36,7 @@ async def get_source_repo(db : db_depends) -> SourceRepository:
 async def get_article_repo(db : db_depends)-> ArticleRepository:
     return SQLArticleRepository(db)
 
+
 # Type of Interface and implemented using the sql implemtation.
 source_depends = Annotated[SourceRepository, Depends(get_source_repo)]
 article_depends = Annotated[ArticleRepository, Depends(get_article_repo)]

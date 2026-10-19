@@ -9,7 +9,6 @@ Seed script to insert the sources.
 Run manually.
 '''
 ## TODO : DB neutral i.e. using repository 
-## TODO : Handle dupes i.e. given comment -- done 
 
 sources = [
     {'name': 'BBC',          'url': 'https://feeds.bbci.co.uk/news/rss.xml',                    'active': True},

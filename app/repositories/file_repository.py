@@ -2,6 +2,11 @@ from app.repositories.base import ArticleRepository
 from app.schemas.news import ArticleRequest
 import json
 
+'''
+Old repo interface implementation to directly use files instead of Database
+Currently not used as no selection in dependency is declared get_db.
+'''
+
 
 class FileArticleRepository(ArticleRepository):
 

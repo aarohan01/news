@@ -1,23 +1,28 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Query
 from contextlib import asynccontextmanager
 
 from app.database import create_tables
-from app.dependencies import db_depends, article_depends, source_depends
+from app.dependencies import article_depends, source_depends
 from app.models.news import Article
 from app.schemas.news import ArticleResponse
 from app.services import ingest
 from app.services import scheduler
+from app.config import Settings
 
 from sqlalchemy import Select
 from datetime import datetime,timedelta,timezone
-### TODO -> Error handling - doing
-# new TODO -> env file -> db url, db type , db file location, logs file 
-# new TODO -> based on db url repo subclass of Postgres
-# new TODO -> alembic migration 
-# new TODO -> Currently fetching from Article last 120 min -> expand options put in repo and take input from user in route
-# new TODO -> return count of articles updated
 
-# TODO -> cleanup, db interfaces -- done
+### DOING ###
+# TODO : Put sources script into an API 
+# TODO : /feed calling repo instead of direct 
+# new TODO -> env file -> db url, db type , db file location, logs file -> PYDANTIC SETTINGS into config - doing
+# new TODO -> Currently fetching from Article last 120 min -> expand options put in repo and take input from user in route return count of articles updated
+
+################  TODO #####################
+### TODO -> Error handling - doing
+# new TODO -> based on db url repo subclass of Postgres, sources.py also changes 
+# new TODO -> alembic migration 
+# TODO :-> cleanup, db interfaces -- done
 # TODO : Add more source -> later convert to a table -- done
 # TODO : schedule injetion instead of API -- done
 # TODO : Big Task Create feed -> categorise and embeddings + sematic classification + feed within a time
@@ -44,34 +49,32 @@ async def lifespan(app : FastAPI):
 
 ### APP ###
 app = FastAPI(lifespan=lifespan)
+#print(Settings.DB_URL)
 
 
-'''
-@app.on_event("startup")
-async def startup():
-    await create_tables()
-'''
+
 
 @app.get('/feed', status_code=status.HTTP_200_OK)
-async def get_feed(db : db_depends) -> list[ArticleResponse]:
+async def get_feed(
+    article_repo : article_depends,
+    minutes : int = Query(default=120,ge=30,le=10080),
+    source_id : int | None = Query(default=None, ge=1),
+    limit : int = Query(default=25,ge=5,le=200)
+    ) -> list[ArticleResponse]:
 
     '''
-    Dependency injection db_depends opens a session with the database
-    Fetch articles from the DB 
-    session runs it so ORM style
-    '''
-    now = datetime.now(tz=timezone.utc)
-    delta = timedelta(minutes=120)
-    window = now - delta
-    
-    stmt = Select(Article).where(Article.published >= window).order_by(Article.published.desc())
-    resp = await db.scalars(stmt)
+    Dependency injection article_depends uses db_depends dependency to get database acesses and provides acesses to article repository
+    ArticleRepository has method to get feed from DB
+    Fetch articles from the DB.
+    Validate to 
 
+    API -> repository
+    '''
+    resp = await article_repo.get_feed_from_db(minutes=minutes, source_id=source_id, limit=limit)
     if not resp:
         raise HTTPException(status_code=404, detail='Not Found')
+    return resp
 
-    response = [ArticleResponse.model_validate(a) for a in resp.all()]
-    return response
     
 
 
@@ -82,10 +85,14 @@ async def ingest_feed(source_repo : source_depends, article_repo : article_depen
     # TODO : no new articles handle 
     # TODO : count the number of new articles ingested and LOG it in fetch and save
 
-    await ingest.fetch_and_save_articles(source_repo,article_repo)
+    '''
+    Ingest articles to the DB using API instead of the scheduled job.
+    API -> ingest service -> clients,repository
+    '''
+    await ingest.fetch_and_save_articles(source_repo, article_repo)
 
 
-    
+
 
 
     

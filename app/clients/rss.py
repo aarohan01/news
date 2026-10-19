@@ -11,8 +11,6 @@ from pydantic import ValidationError
 
 ## Clients ##
 async_client = AsyncClient(timeout=10.0, transport=AsyncHTTPTransport(retries=3))
-#client = Client(timeout=10.0, transport=HTTPTransport(retries=3))
-
 
 
 async def get_rss(source: SourceResponse) -> list[RSSEntryResponse] :
