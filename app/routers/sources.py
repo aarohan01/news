@@ -39,12 +39,12 @@ async def get_active_sources(
 @source_router.get('', status_code=status.HTTP_200_OK)
 async def get_sources(
     source_repo: source_depends,
-    active : bool | None = Query(default=None)
+    active: Annotated[bool | None, Query()] = None
     ) -> list[SourceResponse]:
     sources = await source_repo.get_sources(active)
 
     if not sources:
-        raise HTTPException(status_code=404, detail='Sources not found')
+        raise HTTPException(status_code=204, detail='Sources not found')
 
     return sources
 
@@ -55,8 +55,9 @@ async def get_source(
     ) -> SourceResponse:
     source = await source_repo.get_source(source_id)
 
+    
     if source is None:
-        raise HTTPException(status_code=404, detail='Source not found')
+        raise HTTPException(status_code=204, detail='Source not found')
 
     return source
 
