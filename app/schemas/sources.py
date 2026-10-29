@@ -19,7 +19,7 @@ class SourceRequest(BaseModel):
     '''
     name: str = Field(min_length=1)
     url: str = Field(min_length=5)
-    active: bool | None
+    active: bool | None = Field(default=True)
 
 class SourceUpdate(BaseModel):
 
