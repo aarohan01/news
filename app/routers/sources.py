@@ -43,7 +43,7 @@ async def get_sources(
     ) -> list[SourceResponse]:
     sources = await source_repo.get_sources(active)
 
-    if sources is None:
+    if not sources:
         raise HTTPException(status_code=404, detail='Sources not found')
 
     return sources

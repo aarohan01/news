@@ -44,7 +44,7 @@ class SQLSourceRepository(SourceRepository):
 
     """
 
-    async def get_sources(self, active : bool | None = None) -> list[SourceResponse] | None:
+    async def get_sources(self, active : bool | None = None) -> list[SourceResponse]:
 
         '''
         Fetch the sources from DB 
@@ -70,7 +70,7 @@ class SQLSourceRepository(SourceRepository):
         # TODO : error
         stmt = select(Source).where(Source.id == source_id)
         resp = await self.db.scalar(stmt)         # Scalar preferred in select
-        if resp :
+        if resp is not None:
             source = SourceResponse.model_validate(resp, from_attributes=True)
         else:
             source = None
@@ -126,7 +126,7 @@ class SQLArticleRepository(ArticleRepository):
 
 
     
-    async def save_articles_to_db(self, articles:list[ArticleRequest]) -> None:
+    async def save_articles(self, articles:list[ArticleRequest]) -> None:
         
         '''
         Store the articles from the rss feed to the database.
@@ -158,7 +158,7 @@ class SQLArticleRepository(ArticleRepository):
             #print([r.model_dump() for r in articles_reponse])
             #return articles_reponse
 
-    async def get_feed_from_db(self, minutes : int, source_id : int | None, limit : int ) -> list[ArticleResponse]:
+    async def get_feed(self, minutes : int, source_id : int | None, limit : int ) -> list[ArticleResponse]:
 
 
         # Time 

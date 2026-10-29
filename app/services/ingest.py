@@ -18,11 +18,11 @@ async def fetch_and_save_articles(source_repo: SourceRepository, article_repo : 
     '''
     active_sources = await source_repo.get_sources(active=True)
 
-    if active_sources is not None:
+    if active_sources:
         for s in active_sources:
             entries = await get_rss(s)
             articles = await convert_entries_to_articles(entries, s)
-            await article_repo.save_articles_to_db(articles)
+            await article_repo.save_articles(articles)
 
 
 

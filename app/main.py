@@ -74,7 +74,7 @@ async def get_feed(
 
     API -> repository
     '''
-    resp = await article_repo.get_feed_from_db(minutes=minutes, source_id=source_id, limit=limit)
+    resp = await article_repo.get_feed(minutes=minutes, source_id=source_id, limit=limit)
     if not resp:
         raise HTTPException(status_code=404, detail='Not Found')
     return resp

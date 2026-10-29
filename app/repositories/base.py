@@ -9,11 +9,11 @@ class ArticleRepository(ABC):
     For Article table
     '''
     @abstractmethod
-    async def save_articles_to_db(self, articles:list[ArticleRequest]):
+    async def save_articles(self, articles:list[ArticleRequest]):
         pass 
 
     @abstractmethod
-    async def get_feed_from_db(self, minutes : int, source_id : int | None, limit : int) -> list[ArticleResponse]:
+    async def get_feed(self, minutes : int, source_id : int | None, limit : int) -> list[ArticleResponse]:
         pass 
 
 class SourceRepository(ABC):
@@ -36,7 +36,7 @@ class SourceRepository(ABC):
         pass
     """
     @abstractmethod
-    async def get_sources(self, active : bool | None = None) -> list[SourceResponse] | None:
+    async def get_sources(self, active : bool | None = None) -> list[SourceResponse]:
         pass
 
     @abstractmethod
