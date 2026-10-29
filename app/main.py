@@ -1,26 +1,31 @@
-from fastapi import FastAPI, HTTPException, status, Query
+from typing import Annotated
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI, HTTPException, status, Query, Path
+
+from app.routers.sources import source_router
 from app.database import create_tables
 from app.dependencies import article_depends, source_depends
-from app.models.news import Article
 from app.schemas.news import ArticleResponse
 from app.services import ingest
 from app.services import scheduler
 from app.config import Settings
 
-from sqlalchemy import Select
-from datetime import datetime,timedelta,timezone
 
 ### DOING ###
-# TODO : Put sources script into an API 
-# TODO : /feed calling repo instead of direct 
-# new TODO -> env file -> db url, db type , db file location, logs file -> PYDANTIC SETTINGS into config - doing
-# new TODO -> Currently fetching from Article last 120 min -> expand options put in repo and take input from user in route return count of articles updated
+# new TODO : Put sources script into an API -- done
+# new TODO : /feed calling repo instead of direct --- done
+# new TODO : -> env file -> db url, db type , db file location, logs file -> PYDANTIC SETTINGS into config - doing
+# new TODO : -> Currently fetching from Article last 120 min -> 
+# expand options put in repo and take input from user in route return count of articles updated - done
+# new TODO : Logging of event.
+# new TODO : Empty response error for feed and rss handle
+# new TODO : Docstrings edit
+# new TODO -> based on db url repo subclass of Postgres, sources.py also changes 
+
 
 ################  TODO #####################
 ### TODO -> Error handling - doing
-# new TODO -> based on db url repo subclass of Postgres, sources.py also changes 
 # new TODO -> alembic migration 
 # TODO :-> cleanup, db interfaces -- done
 # TODO : Add more source -> later convert to a table -- done
@@ -49,17 +54,16 @@ async def lifespan(app : FastAPI):
 
 ### APP ###
 app = FastAPI(lifespan=lifespan)
+app.include_router(source_router)
 #print(Settings.DB_URL)
-
-
 
 
 @app.get('/feed', status_code=status.HTTP_200_OK)
 async def get_feed(
     article_repo : article_depends,
-    minutes : int = Query(default=120,ge=30,le=10080),
-    source_id : int | None = Query(default=None, ge=1),
-    limit : int = Query(default=25,ge=5,le=200)
+    minutes : Annotated[int, Query(ge=30,le=10080)] = 120,
+    source_id : Annotated[int | None, Query(ge=1)] = None,
+    limit : Annotated[int, Query(ge=5,le=200)] = 25
     ) -> list[ArticleResponse]:
 
     '''

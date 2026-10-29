@@ -10,5 +10,6 @@ dependencies = [
     "fastapi[standard]>=0.142.1",
     "feedparser>=6.0.14",
     "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
     "sqlalchemy[asyncio,standard]>=2.1.1",
 ]

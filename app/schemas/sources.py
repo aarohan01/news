@@ -10,3 +10,23 @@ class SourceResponse(BaseModel):
     name: str = Field(min_length=1)
     url: str = Field(min_length=5)
     active: bool
+
+
+class SourceRequest(BaseModel):
+
+    '''
+    Add the sources to the DB
+    '''
+    name: str = Field(min_length=1)
+    url: str = Field(min_length=5)
+    active: bool
+
+class SourceUpdate(BaseModel):
+
+    '''
+    Update the source in DB
+    '''
+    name: str | None = Field(default=None, min_length=1)
+    url: str | None = Field(default=None, min_length=5)
+    active: bool | None = None
+

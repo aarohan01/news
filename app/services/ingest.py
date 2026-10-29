@@ -6,7 +6,7 @@ from app.clients.rss import get_rss
 from app.utils import time_struct_to_datetime
 
 
-
+# TODO : no sources i.e. None error
 async def fetch_and_save_articles(source_repo: SourceRepository, article_repo : ArticleRepository):
 
     '''
@@ -16,11 +16,13 @@ async def fetch_and_save_articles(source_repo: SourceRepository, article_repo : 
     Convert the entries to ArticleRequest
     Save the articles -> DB operation i.e. repo
     '''
-    sources_resp = await source_repo.get_active_sources_from_db()
-    for s in sources_resp:
-        entries = await get_rss(s)
-        articles = await convert_entries_to_articles(entries, s)
-        await article_repo.save_articles_to_db(articles)
+    active_sources = await source_repo.get_sources(active=True)
+
+    if active_sources is not None:
+        for s in active_sources:
+            entries = await get_rss(s)
+            articles = await convert_entries_to_articles(entries, s)
+            await article_repo.save_articles_to_db(articles)
 
 
 

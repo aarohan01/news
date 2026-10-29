@@ -1,12 +1,10 @@
-from abc import abstractmethod
-
 from app.repositories.base import ArticleRepository, SourceRepository
 from app.schemas.news import ArticleRequest, ArticleResponse
-from app.schemas.sources import SourceResponse
+from app.schemas.sources import SourceRequest, SourceResponse, SourceUpdate
 from app.models.news import Article, Source
 
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy import Select
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from datetime import datetime, timedelta, timezone
@@ -16,6 +14,7 @@ Repo to handle Database Operations.
 SQLalchemy takes care when switching DB.
 IMPORTANT : Methods don't return ORM object always Pydantic schemas.Validate here.
 '''
+# TODO : error handling
 
 class SQLSourceRepository(SourceRepository):
 
@@ -26,6 +25,7 @@ class SQLSourceRepository(SourceRepository):
         '''
         self.db = db
 
+    """
     async def get_active_sources_from_db(self) -> list[SourceResponse]:
 
         '''
@@ -34,7 +34,7 @@ class SQLSourceRepository(SourceRepository):
         Return a list of the Source schemas
         '''
 
-        stmt = Select(Source).where(Source.active == True)
+        stmt = select(Source).where(Source.active == True)
         res = await self.db.scalars(stmt)
         res_all = res.all()   # List of Source ORM objects
         
@@ -42,6 +42,71 @@ class SQLSourceRepository(SourceRepository):
 
         return sources
 
+    """
+
+    async def get_sources(self, active : bool | None = None) -> list[SourceResponse] | None:
+
+        '''
+        Fetch the sources from DB 
+        Validate the ORM object to Pydantic Schema
+        Return a list of the Source schemas
+        '''
+
+        stmt = select(Source)
+        if active is not None:
+            stmt = stmt.where(Source.active == active)
+        res = await self.db.scalars(stmt)
+        res_all = res.all()   # List of Source ORM objects
+        
+        sources = [SourceResponse.model_validate(r, from_attributes=True) for r in res_all]
+
+        return sources
+    
+    async def get_source(self, source_id: int) -> SourceResponse | None:
+
+        '''
+        Get source to DB
+        '''
+        # TODO : error
+        stmt = select(Source).where(Source.id == source_id)
+        resp = await self.db.scalar(stmt)         # Scalar preferred in select
+        if resp :
+            source = SourceResponse.model_validate(resp, from_attributes=True)
+        else:
+            source = None
+
+        return source
+
+    async def add_source(self, source : SourceRequest) -> None:
+
+        '''
+        Add source to DB
+        '''
+        # TODO : error
+        stmt = insert(Source).values(source.model_dump())
+        await self.db.execute(stmt)
+        await self.db.commit()
+
+
+    async def update_source(self, source_id: int, source: SourceUpdate) -> None:
+        '''
+        Update source in DB
+        '''
+        # TODO : errors
+        # TODO : empty dict and null name
+        stmt = update(Source).where(Source.id == source_id).values(source.model_dump(exclude_unset=True))
+        await self.db.execute(stmt)
+        await self.db.commit()
+
+    async def delete_source(self, source_id: int) -> None:
+
+        '''
+        Delete source from DB
+        '''
+        # TODO : error not found
+        stmt = delete(Source).where(Source.id == source_id)
+        await self.db.execute(stmt)
+        await self.db.commit()
 
 class SQLArticleRepository(ArticleRepository):
 
@@ -100,7 +165,7 @@ class SQLArticleRepository(ArticleRepository):
         now = datetime.now(tz=timezone.utc)
         delta = timedelta(minutes=minutes)
         window = now - delta
-        stmt = Select(Article).where(Article.published >= window).order_by(Article.published.desc())
+        stmt = select(Article).where(Article.published >= window).order_by(Article.published.desc())
         
         # Source
         if source_id:

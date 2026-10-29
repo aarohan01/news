@@ -648,6 +648,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "feedparser" },
     { name = "pydantic" },
+    { name = "pydantic-settings" },
     { name = "sqlalchemy", extra = ["asyncio"] },
 ]
 
@@ -658,6 +659,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.142.1" },
     { name = "feedparser", specifier = ">=6.0.14" },
     { name = "pydantic", specifier = ">=2.13.5" },
+    { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "sqlalchemy", extras = ["asyncio", "standard"], specifier = ">=2.1.1" },
 ]
 
