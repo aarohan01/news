@@ -55,7 +55,7 @@ async def lifespan(app : FastAPI):
 ### APP ###
 app = FastAPI(lifespan=lifespan)
 app.include_router(source_router)
-#print(Settings.DB_URL)
+
 
 
 @app.get('/feed', status_code=status.HTTP_200_OK)

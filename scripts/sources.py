@@ -9,6 +9,10 @@ Seed script to insert the sources.
 Run manually.
 '''
 ## TODO : DB neutral i.e. using repository 
+## TODO : DB neutral i.e. using repository / settings
+## TODO : Use the methods instead of direct insert get source repo and use the schema and methods 
+## But need to check dupes when adding
+
 
 sources = [
     {'name': 'BBC',          'url': 'https://feeds.bbci.co.uk/news/rss.xml',                    'active': True},
